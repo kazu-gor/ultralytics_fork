@@ -17,7 +17,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from torch import distributed as dist
+from torch import distributed as dist, qr
 from torch import nn, optim
 
 from ultralytics.cfg import get_cfg, get_save_dir
@@ -320,8 +320,9 @@ class BaseTrainer:
     def _do_train_one_epoch(self, world_size=1):
         """Train completed, evaluate and plot if specified by arguments."""
 
-        self.preds_epoch = torch.tensor([])
-        self.scores_epoch = torch.tensor([])
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.preds_epoch = torch.tensor([]).to(device)
+        self.scores_epoch = torch.tensor([]).to(device)
         self.im_file_epoch = []
         if self.epoch == 0:
             if world_size > 1:
