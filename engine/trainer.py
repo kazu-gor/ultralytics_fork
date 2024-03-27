@@ -367,6 +367,10 @@ class BaseTrainer:
         for i, batch in pbar:
             # im_file is taple
             self.im_file_epoch.extend(batch['im_file'])
+            print(batch["batch_idx"].view(-1, 1))
+            print(batch["cls"].view(-1, 1))
+            print(batch["bboxes"])
+
             self.run_callbacks("on_train_batch_start")
             # Warmup
             ni = i + self.nb * self.epoch

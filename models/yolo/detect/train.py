@@ -39,28 +39,34 @@ class DetectionTrainer(BaseTrainer):
             mode (str): `train` mode or `val` mode, users are able to customize different augmentations for each mode.
             batch (int, optional): Size of batches, this is for `rect`. Defaults to None.
         """
-        gs = max(int(de_parallel(self.model).stride.max() if self.model else 0), 32)
+        gs = max(int(de_parallel(self.model).stride.max()
+                 if self.model else 0), 32)
         return build_yolo_dataset(self.args, img_path, batch, self.data, mode=mode, rect=mode == "val", stride=gs)
 
     def get_dataloader(self, dataset_path, batch_size=16, rank=0, mode="train"):
         """Construct and return dataloader."""
         assert mode in ["train", "val"]
-        with torch_distributed_zero_first(rank):  # init dataset *.cache only once if DDP
+        # init dataset *.cache only once if DDP
+        with torch_distributed_zero_first(rank):
             dataset = self.build_dataset(dataset_path, mode, batch_size)
         shuffle = mode == "train"
         if getattr(dataset, "rect", False) and shuffle:
-            LOGGER.warning("WARNING ⚠️ 'rect=True' is incompatible with DataLoader shuffle, setting shuffle=False")
+            LOGGER.warning(
+                "WARNING ⚠️ 'rect=True' is incompatible with DataLoader shuffle, setting shuffle=False")
             shuffle = False
         workers = self.args.workers if mode == "train" else self.args.workers * 2
-        return build_dataloader(dataset, batch_size, workers, shuffle, rank)  # return dataloader
+        # return dataloader
+        return build_dataloader(dataset, batch_size, workers, shuffle, rank)
 
     def preprocess_batch(self, batch):
         """Preprocesses a batch of images by scaling and converting to float."""
-        batch["img"] = batch["img"].to(self.device, non_blocking=True).float() / 255
+        batch["img"] = batch["img"].to(
+            self.device, non_blocking=True).float() / 255
         if self.args.multi_scale:
             imgs = batch["img"]
             sz = (
-                random.randrange(self.args.imgsz * 0.5, self.args.imgsz * 1.5 + self.stride)
+                random.randrange(self.args.imgsz * 0.5,
+                                 self.args.imgsz * 1.5 + self.stride)
                 // self.stride
                 * self.stride
             )  # size
@@ -69,7 +75,8 @@ class DetectionTrainer(BaseTrainer):
                 ns = [
                     math.ceil(x * sf / self.stride) * self.stride for x in imgs.shape[2:]
                 ]  # new shape (stretched to gs-multiple)
-                imgs = nn.functional.interpolate(imgs, size=ns, mode="bilinear", align_corners=False)
+                imgs = nn.functional.interpolate(
+                    imgs, size=ns, mode="bilinear", align_corners=False)
             batch["img"] = imgs
         return batch
 
@@ -85,7 +92,8 @@ class DetectionTrainer(BaseTrainer):
 
     def get_model(self, cfg=None, weights=None, verbose=True):
         """Return a YOLO detection model."""
-        model = DetectionModel(cfg, nc=self.data["nc"], verbose=verbose and RANK == -1)
+        model = DetectionModel(
+            cfg, nc=self.data["nc"], verbose=verbose and RANK == -1)
         if weights:
             model.load(weights)
         return model
@@ -105,7 +113,8 @@ class DetectionTrainer(BaseTrainer):
         """
         keys = [f"{prefix}/{x}" for x in self.loss_names]
         if loss_items is not None:
-            loss_items = [round(float(x), 5) for x in loss_items]  # convert tensors to 5 decimal place floats
+            # convert tensors to 5 decimal place floats
+            loss_items = [round(float(x), 5) for x in loss_items]
             return dict(zip(keys, loss_items))
         else:
             return keys
@@ -138,6 +147,13 @@ class DetectionTrainer(BaseTrainer):
 
     def plot_training_labels(self):
         """Create a labeled training plot of the YOLO model."""
-        boxes = np.concatenate([lb["bboxes"] for lb in self.train_loader.dataset.labels], 0)
-        cls = np.concatenate([lb["cls"] for lb in self.train_loader.dataset.labels], 0)
-        plot_labels(boxes, cls.squeeze(), names=self.data["names"], save_dir=self.save_dir, on_plot=self.on_plot)
+        boxes = np.concatenate([lb["bboxes"]
+                               for lb in self.train_loader.dataset.labels], 0)
+        cls = np.concatenate([lb["cls"]
+                             for lb in self.train_loader.dataset.labels], 0)
+        plot_labels(boxes, cls.squeeze(
+        plot_labels(boxes, cls.squeeze(
+        ), names=self.data["names"], save_dir=self.save_dir, on_plot=self.on_plot)
+
+        plot_labels(boxes, cls.squeeze(
+        ), names=self.data["names"], save_dir=self.save_dir, on_plot=self.on_plot)
