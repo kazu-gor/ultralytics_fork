@@ -918,9 +918,6 @@ class Format:
         instances.convert_bbox(format=self.bbox_format)
         instances.denormalize(w, h)
         nl = len(instances)
-        print('-'*50)
-        print(f"{labels = }")
-        print('-'*50)
 
         if self.return_mask:
             if nl:
