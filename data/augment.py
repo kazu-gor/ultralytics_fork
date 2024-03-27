@@ -942,6 +942,9 @@ class Format:
         # Then we can use collate_fn
         if self.batch_idx:
             labels["batch_idx"] = torch.zeros(nl)
+        print('-' * 20)
+        print(labels)
+        print('-' * 20)
         return labels
 
     def _format_img(self, img):
