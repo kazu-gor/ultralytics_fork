@@ -918,6 +918,9 @@ class Format:
         instances.convert_bbox(format=self.bbox_format)
         instances.denormalize(w, h)
         nl = len(instances)
+        print('-' * 20)  # TODO
+        print(instances)  # TODO
+        print('-' * 20)  # TODO
 
         if self.return_mask:
             if nl:
@@ -942,9 +945,11 @@ class Format:
         # Then we can use collate_fn
         if self.batch_idx:
             labels["batch_idx"] = torch.zeros(nl)
-        print('-' * 20)
-        print(labels)
-        print('-' * 20)
+
+        print('-' * 20)  # TODO
+        print(labels)  # TODO
+        print('-' * 20)  # TODO
+
         return labels
 
     def _format_img(self, img):
