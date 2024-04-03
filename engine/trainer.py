@@ -206,8 +206,8 @@ class BaseTrainer:
                 ddp_cleanup(self, str(file))
 
         else:
-            # self._do_train(world_size)
-            return self._do_train_one_epoch(world_size)
+            self._do_train(world_size)
+            # return self._do_train_one_epoch(world_size)
 
     def _setup_scheduler(self):
         """Initialize training learning rate scheduler."""
